@@ -22,3 +22,13 @@
 .task-btns {
     max-width: 10vw;
 }
+
+.general-columns {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.column {
+    display: flex;
+    flex-flow: column nowrap;
+}

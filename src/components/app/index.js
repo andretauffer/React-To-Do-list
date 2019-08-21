@@ -7,7 +7,13 @@ const App = (props) => {
         <div>
             <h1>Task Manager</h1>
             <FormData />
-            <TaskData />
+            <div className="general-columns">
+                <TaskData column={'created'} />
+                <TaskData column={'active'} />
+                <TaskData column={'completed'} />
+                <TaskData column={'onhold'} />
+                <TaskData column={'deleted'} />
+            </div>
         </div>
     )
 }
@@ -43,48 +49,48 @@ const Form = (props) =>
                     value={props.getDescription}
                     onChange={props.setDescription} />
                 <div className="buttons-container">
-
-                    <p>{props.getTitle}</p>
-
                     <button id="submit-btn" type="button" value="send" onClick={props.storeTask}>Create</button>
-                    {/* <button id="submit-btn" type="button" value="send" onClick={props.getStuff}>Do other stuff</button> */}
                     <button id="submit-btn" type="button" value="send" onClick={props.deleteAll}>Delete everything!</button>
                 </div>
             </form>
         </div>
     </div>
 
-const Created = (props) =>
-    <div className="column created">
-        {props.getStore ? props.getStore.map(el => {
-            return (
-                <div className="task created" id={el.id}>
-                    <div className="task-title">Title: {el.title}</div>
-                    {el.developer ? <div className="task-developer"> Developer: {el.developer}</div>
-                        : <input
-                            className="developer-input"
-                            type="text"
-                            value={props.getDeveloper}
-                            onChange={props.setDeveloper}
-                            placeholder="Developer"></input>}
-                    {el.description ? <div className="task-description">Description: {el.description}</div> : <textarea
-                        id="desc"
-                        rows="5"
-                        className="description"
-                        value={props.getDescription}
-                        onChange={props.setDescription} />}
-                    <div className="task-status"> {el.status}</div>
-                    <div className="btns-container">
-                        <button className="task-btns" onClick={props.deleteTask}>Delete</button>
-                        <button className="task-btns">Completed</button>
-                        <button className="task-btns">On Hold</button>
-                        <button className="task-btns" onClick={props.update}>Update</button>
-                    </div>
-                </div>
-            )
-        }) : <div>No tasks at the moment</div>}
-        )
-    </div>
+const Created = (props) => {
+    return (
+        <div className="column">
+            {props.getStore ? props.getStore.map(el => {
+                if (el.status === props.column) {
+                    return (
+                        <div className="task created" id={el.id}>
+                            <div className="task-title">Title: {el.title}</div>
+                            {el.developer ? <div className="task-developer"> Developer: {el.developer}</div>
+                                : <input
+                                    className="developer-input"
+                                    type="text"
+                                    value={props.getDeveloper}
+                                    onChange={props.setDeveloper}
+                                    placeholder="Developer"></input>}
+                            {el.description ? <div className="task-description">Description: {el.description}</div> : <textarea
+                                id="desc"
+                                rows="5"
+                                className="description"
+                                value={props.getDescription}
+                                onChange={props.setDescription} />}
+                            <div className="task-status"> {el.status}</div>
+                            <div className="btns-container">
+                                <button className="task-btns" onClick={props.deleteTask}>Delete</button>
+                                <button className="task-btns" onClick={props.completedTask}>Completed</button>
+                                <button className="task-btns" onClick={props.onholdTask}>On Hold</button>
+                                <button className="task-btns" onClick={props.update}>Update</button>
+                            </div>
+                        </div>
+                    )
+                }
+            }) : <div>No tasks at the moment</div>}
+        </div>
+    )
+}
 
 
 
@@ -114,26 +120,6 @@ const HOCreducer = (state, action) => {
                 error: '',
                 store: state,
             }
-        case 'active':
-            return {
-                ...state,
-                status: 'active'
-            }
-        case 'completed':
-            return {
-                ...state,
-                status: 'completed'
-            }
-        case 'onhold':
-            return {
-                ...state,
-                status: 'onhold'
-            }
-        case 'deleted':
-            return {
-                ...state,
-                status: 'deleted'
-            }
         case 'error':
             return {
                 ...state,
@@ -155,9 +141,9 @@ const HOC = Component => {
             return list;
         }
         const tasklist = readFromStorage();
-        
+
         const createTask = () => {
-            let id = Math.round(Math.random()*1000);
+            let id = Math.round(Math.random() * 1000);
             if (title !== '') {
                 dispatch({ type: 'created' });
                 tasklist.push({
@@ -178,27 +164,29 @@ const HOC = Component => {
             localStorage.removeItem('list');
             window.location.reload();
         }
-        
-        const updateTask = (e) => {
+
+
+
+        const updateTask = (e, action) => {
             const elementId = Number(e.currentTarget.parentElement.parentElement.id);
             const updatedTaskList = tasklist.map(el => {
-                if(el.id === elementId) {
-                    return el = {title: el.title, developer, description, status: status, id: el.id };
+                if (el.id === elementId) {
+                    switch (action.type) {
+                        case 'update':
+                            return el = { title: el.title, developer, description, status: status, id: el.id };
+                        case 'delete':
+                            return el = { title: el.title, developer, description, status: 'deleted', id: el.id };
+                        case 'onhold':
+                            return el = { title: el.title, developer, description, status: 'onhold', id: el.id };
+                        case 'completed':
+                            return el = { title: el.title, developer, description, status: 'completed', id: el.id };
+                        case 'active':
+                            return el = { title: el.title, developer, description, status: 'active', id: el.id };
+                        default:
+                            break;
+                    }
                 }
                 return el
-            })
-            localStorage.setItem('list', JSON.stringify(updatedTaskList));
-            window.location.reload();
-        }
-
-        const deleteTask = (e) => {
-            const elementId = Number(e.currentTarget.parentElement.parentElement.id);
-            let updatedTaskList = []; 
-            tasklist.map(el => {
-                if(el.id === elementId) {
-                    return el = null;
-                }
-                return updatedTaskList.push(el); 
             })
             localStorage.setItem('list', JSON.stringify(updatedTaskList));
             window.location.reload();
@@ -229,9 +217,12 @@ const HOC = Component => {
                 storeTask={() => createTask()}
                 getTask={() => readFromStorage()}
                 getStore={tasklist}
-                deleteTask={(e) => deleteTask(e)}
+                deleteTask={(e) => updateTask(e, { type: 'delete'})}
+                onholdTask={(e) => updateTask(e, { type: 'onhold'})}
+                completedTask={(e) => updateTask(e, { type: 'completed'})}
+                activeTask={(e) => updateTask(e, { type: 'active'})}
                 deleteAll={() => cleanStorage()}
-                update={(e) => updateTask(e)}
+                update={(e) => updateTask(e, { type: 'update'})}
                 error={error} />
         )
     }
