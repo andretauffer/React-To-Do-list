@@ -6,13 +6,15 @@ const App = (props) => {
 
         <div>
             <h1>Task Manager</h1>
+            <div className="form-trash">
             <FormData />
+            {props.trash === 'true' ? <TaskData column={'deleted'}/> : null}
+            </div>
             <div className="general-columns">
                 <TaskData column={'created'} />
+                <TaskData column={'onhold'} />
                 <TaskData column={'active'} />
                 <TaskData column={'completed'} />
-                <TaskData column={'onhold'} />
-                <TaskData column={'deleted'} />
             </div>
         </div>
     )
@@ -51,6 +53,7 @@ const Form = (props) =>
                 <div className="buttons-container">
                     <button id="submit-btn" type="button" value="send" onClick={props.storeTask}>Create</button>
                     <button id="submit-btn" type="button" value="send" onClick={props.deleteAll}>Delete everything!</button>
+                    <button id="submit-btn" type="button" value="send" onClick={props.showTrash}>Show trash!</button>
                 </div>
             </form>
         </div>
@@ -62,7 +65,7 @@ const Created = (props) => {
             {props.getStore ? props.getStore.map(el => {
                 if (el.status === props.column) {
                     return (
-                        <div className="task created" id={el.id}>
+                        <div className={"task " + props.column} id={el.id}>
                             <div className="task-title">Title: {el.title}</div>
                             {el.developer ? <div className="task-developer"> Developer: {el.developer}</div>
                                 : <input
@@ -79,10 +82,23 @@ const Created = (props) => {
                                 onChange={props.setDescription} />}
                             <div className="task-status"> {el.status}</div>
                             <div className="btns-container">
-                                <button className="task-btns" onClick={props.deleteTask}>Delete</button>
-                                <button className="task-btns" onClick={props.completedTask}>Completed</button>
-                                <button className="task-btns" onClick={props.onholdTask}>On Hold</button>
+                                {(el.status === 'deleted' || el.status === 'completed') ?
+                                    <button className="task-btns" disabled>Delete</button> :
+                                    <button className="task-btns" onClick={props.deleteTask}>Delete</button>
+                                }
+                                {el.status === 'active' ?
+                                    <button className="task-btns" onClick={props.completedTask}>Completed</button> :
+                                    <button className="task-btns" disabled>Completed</button>
+                                }
+                                {(el.status === 'onhold' || el.status === 'completed') ?
+                                    <button className="task-btns" disabled>On Hold</button> :
+                                    <button className="task-btns" onClick={props.onholdTask}>On Hold</button>
+                                }
                                 <button className="task-btns" onClick={props.update}>Update</button>
+                                {(!el.developer || el.status === 'active' || el.status === 'completed' || el.status === 'deleted') ?
+                                    <button className="task-btns" disabled>Active</button> :
+                                    <button className="task-btns" onClick={props.activeTask}>Active</button>
+                                }
                             </div>
                         </div>
                     )
@@ -92,8 +108,6 @@ const Created = (props) => {
     )
 }
 
-
-
 const initialState = {
     title: '',
     description: '',
@@ -101,6 +115,7 @@ const initialState = {
     status: '',
     error: '',
     store: [],
+    showTrash: 'false',
 }
 
 const HOCreducer = (state, action) => {
@@ -125,7 +140,12 @@ const HOCreducer = (state, action) => {
                 ...state,
                 error: 'You should have a title for the task'
             }
-
+        case 'showTrash':
+            return {
+                ...state,
+                showTrash: 'true'
+            }
+       
         default:
             break;
     }
@@ -134,7 +154,7 @@ const HOCreducer = (state, action) => {
 const HOC = Component => {
     const GetFormData = (props) => {
         const [state, dispatch] = useReducer(HOCreducer, initialState);
-        const { title, developer, description, error, status } = state;
+        const { title, developer, description, error, status, showTrash } = state;
         const readFromStorage = () => {
             let list = localStorage.getItem('list');
             list !== null ? list = JSON.parse(list) : list = [];
@@ -165,23 +185,21 @@ const HOC = Component => {
             window.location.reload();
         }
 
-
-
         const updateTask = (e, action) => {
             const elementId = Number(e.currentTarget.parentElement.parentElement.id);
             const updatedTaskList = tasklist.map(el => {
                 if (el.id === elementId) {
                     switch (action.type) {
                         case 'update':
-                            return el = { title: el.title, developer, description, status: status, id: el.id };
+                            return el = { title: el.title, developer, description, status: el.status, id: el.id };
                         case 'delete':
-                            return el = { title: el.title, developer, description, status: 'deleted', id: el.id };
+                            return el = { title: el.title, developer: el.developer, description: el.description, status: 'deleted', id: el.id };
                         case 'onhold':
-                            return el = { title: el.title, developer, description, status: 'onhold', id: el.id };
+                            return el = { title: el.title, developer: el.developer, description: el.description, status: 'onhold', id: el.id };
                         case 'completed':
-                            return el = { title: el.title, developer, description, status: 'completed', id: el.id };
+                            return el = { title: el.title, developer: el.developer, description: el.description, status: 'completed', id: el.id };
                         case 'active':
-                            return el = { title: el.title, developer, description, status: 'active', id: el.id };
+                            return el = { title: el.title, developer: el.developer, description: el.description, status: 'active', id: el.id };
                         default:
                             break;
                     }
@@ -217,12 +235,14 @@ const HOC = Component => {
                 storeTask={() => createTask()}
                 getTask={() => readFromStorage()}
                 getStore={tasklist}
-                deleteTask={(e) => updateTask(e, { type: 'delete'})}
-                onholdTask={(e) => updateTask(e, { type: 'onhold'})}
-                completedTask={(e) => updateTask(e, { type: 'completed'})}
-                activeTask={(e) => updateTask(e, { type: 'active'})}
+                deleteTask={(e) => updateTask(e, { type: 'delete' })}
+                onholdTask={(e) => updateTask(e, { type: 'onhold' })}
+                completedTask={(e) => updateTask(e, { type: 'completed' })}
+                activeTask={(e) => updateTask(e, { type: 'active' })}
                 deleteAll={() => cleanStorage()}
-                update={(e) => updateTask(e, { type: 'update'})}
+                showTrash={() => dispatch({ type: 'showTrash'})}
+                trash={showTrash}
+                update={(e) => updateTask(e, { type: 'update' })}
                 error={error} />
         )
     }
@@ -232,5 +252,6 @@ const HOC = Component => {
 
 const FormData = HOC(Form);
 const TaskData = HOC(Created);
+const EnhancedApp = HOC(App);
 
-export default App
+export default EnhancedApp
