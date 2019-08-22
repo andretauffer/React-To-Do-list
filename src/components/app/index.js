@@ -46,7 +46,7 @@ const Form = (props) =>
                         onChange={props.setTitle}
                         required />
                 </label>
-                <label htmlFor="developer">
+                <label htmlFor="developer-input">
                     <p>Developer</p>
                     <input
                         className="developer-input"
@@ -72,7 +72,7 @@ const Form = (props) =>
 
 const Tasks = (props) => {
     return (
-        <div className={"column " + props.column + " toggle-light"}>
+        <div className={"column toggle-light"}>
             {props.getStore.find(el => el.status === props.column) ? <h4 className="column-titles"> {props.column.toUpperCase()} </h4>
              : <div className="no-tasks">No {props.column} tasks at the moment</div>}
             {props.getStore.map(el => {

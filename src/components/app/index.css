@@ -31,6 +31,8 @@
     background-color: white;
     border-radius: 0.2em;
     box-shadow: 5px 6px 12px -4px rgba(148,118,148,1);
+    background-color: rgba(225, 212, 212);
+
 }
 
 .created {
@@ -77,6 +79,9 @@
     /* background-color: #fff; */
     border-radius: 1%;
     margin: 0 0.5vw 0 0.5vw;
+    box-shadow: 5px 6px 12px -4px rgba(148,118,148,1);
+    background-color: rgba(225, 212, 212, 0.048);
+    
 }
 
 .edit {
