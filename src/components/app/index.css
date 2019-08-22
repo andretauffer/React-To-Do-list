@@ -70,6 +70,14 @@
     flex-flow: column nowrap;
 }
 
+.edit {
+    margin-right: 1vw;
+    margin-left: 0 auto;
+    padding-left: 5vw;
+    width: 2vw;
+    height: 2vw;
+}
+
 .no-tasks {
     display: flex;
     flex-flow: column nowrap;
@@ -92,4 +100,9 @@
     padding: 0.1vw;
     width: 5vw;
     height: 5vw;
+}
+
+.developer-field-btn {
+    display: flex;
+    flex-flow: row nowrap;
 }

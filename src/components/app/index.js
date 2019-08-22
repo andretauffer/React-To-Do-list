@@ -1,7 +1,8 @@
-import React, { useReducer, useEffect } from 'react'
+import React, { useReducer, useRef } from 'react'
 import './index.css';
 import trashWhite from './images/trashwhite.png'
 import trashBlack from './images/trashblack.png'
+import edit from './images/edit.png'
 // const trashBin = require('./images/noun_Trash_281501513.png')
 
 const App = (props) => {
@@ -14,9 +15,9 @@ const App = (props) => {
                 {props.trash ?
                     <div>
                         <Tasks {...props} column={'deleted'} updateTask={props.update} />
-                        <img src={trashWhite} alt="trashBin" className="trash-btn white" type="button" value="send" onClick={props.hideTrashBin}/>
+                        <img src={trashWhite} alt="trashBin" className="trash-btn white" type="button" value="send" onClick={props.hideTrashBin} />
                     </div>
-                    : <img src={trashBlack} alt="trashBin" className="trash-btn black" type="button" value="send" onClick={props.showTrashBin}/>}
+                    : <img src={trashBlack} alt="trashBin" className="trash-btn black" type="button" value="send" onClick={props.showTrashBin} />}
             </div>
             <div className="general-columns">
                 <Tasks {...props} column={'created'} updateTask={props.update} />
@@ -55,7 +56,7 @@ const Form = (props) =>
                 <textarea
                     id="desc"
                     rows="5"
-                    className="description"
+                    className="description-input"
                     value={props.getDescription}
                     onChange={props.setDescription} />
                 <div className="buttons-container">
@@ -67,10 +68,6 @@ const Form = (props) =>
     </div>
 
 const Tasks = (props) => {
-    console.log(props.getStore.find(el => {
-        console.log(el);
-        // el.state === props.column
-    }))
     return (
         <div className={"column " + props.column}>
             {props.getStore.find(el => el.status === props.column) ? props.column : <div className="no-tasks">No {props.column} tasks at the moment</div>}
@@ -79,20 +76,27 @@ const Tasks = (props) => {
                     return (
                         <div className={"task " + props.column} id={el.id}>
                             <div className="task-title">Title: {el.title}</div>
-                            {el.developer ? <div className="task-developer"> Developer: {el.developer}</div>
+                            {el.developer ?
+                                <div className="developer-field-btn">
+                                    <div className="task-developer"> Developer: {el.developer}</div>
+                                    <img src={edit} alt='edit' className="edit btn" onClick={(e) => props.updateTask(e, { type: 'clearDevField' })}/>
+                                </div>
                                 : <input
                                     className="developer-input"
                                     type="text"
-                                    value={props.getDeveloper}
-                                    onChange={props.setDeveloper}
-                                    // onChange={props.setDeveloper}
+                                    ref={props.referenceDev}
                                     placeholder="Developer"></input>}
-                            {el.description ? <div className="task-description">Description: {el.description}</div> : <textarea
-                                id="desc"
-                                rows="5"
-                                className="description"
-                                value={props.getDescription}
-                                onChange={props.setDescription} />}
+                            {el.description ?
+                                <div className="developer-field-btn">
+                                    <div className="task-description">Description: {el.description}</div>
+                                    <img src={edit} alt='edit' className="edit btn" onClick={(e) => props.updateTask(e, { type: 'clearDescField' })}/>
+                                </div>
+                                : <textarea
+                                    id="desc"
+                                    rows="5"
+                                    className="description-input"
+                                    ref={props.referenceDesc} />}
+
                             <div className="task-status"> {el.status}</div>
                             <div className="btns-container">
                                 {(el.status === 'deleted' || el.status === 'completed') ?
@@ -116,7 +120,7 @@ const Tasks = (props) => {
                         </div>
                     )
                 }
-            }) : <div className="no-tasks">No {props.column} tasks at the moment</div>}
+            }) : <div className="no-tasks"></div>}
         </div>
     )
 }
@@ -177,6 +181,8 @@ const HOC = Component => {
     const GetFormData = (props) => {
         const [state, dispatch] = useReducer(HOCreducer, initialState);
         const { title, developer, description, error, status, showTrash } = state;
+        const currentDevField = useRef(null);
+        const currentDescField = useRef(null);
         const readFromStorage = () => {
             let list = localStorage.getItem('list');
             list !== null ? list = JSON.parse(list) : list = [];
@@ -203,7 +209,7 @@ const HOC = Component => {
 
         const cleanStorage = () => {
             localStorage.removeItem('list');
-            dispatch({ type: 'update', value: []})
+            dispatch({ type: 'update', value: [] })
         }
 
         const updateTask = (e, action) => {
@@ -212,14 +218,17 @@ const HOC = Component => {
                 if (el.id === elementId) {
                     switch (action.type) {
                         case 'update':
-                            console.log('dev and desc', el.developer, el.description)
                             let actualDev = '';
-                            el.developer !== undefined ? actualDev = el.developer : actualDev = developer ;
-                            // if(el.developer !== undefined) dispatch({ type: 'developer', value: el.developer});
-                            // if(el.description !== undefined) dispatch({ type: 'description', value: el.description});
-                            return el = { title: el.title, developer, description, status: el.status, id: el.id };
-                            case 'delete':
+                            let actualDesc = '';
+                            currentDevField.current ? actualDev = currentDevField.current.value : actualDev = el.developer;
+                            currentDescField.current ? actualDesc = currentDescField.current.value : actualDesc = el.description;
+                            return el = { title: el.title, developer: actualDev, description: actualDesc, status: el.status, id: el.id };
+                        case 'delete':
                             return el = { title: el.title, developer: el.developer, description: el.description, status: 'deleted', id: el.id };
+                        case 'clearDevField':
+                            return el = { title: el.title, developer: '', description: el.description, status: el.status, id: el.id };
+                        case 'clearDescField':
+                            return el = { title: el.title, developer: el.developer, description: '', status: el.status, id: el.id };
                         case 'on-hold':
                             return el = { title: el.title, developer: el.developer, description: el.description, status: 'on-hold', id: el.id };
                         case 'completed':
@@ -233,7 +242,7 @@ const HOC = Component => {
                 return el
             })
             localStorage.setItem('list', JSON.stringify(updatedTaskList));
-            dispatch({type: 'update', value: tasklist})
+            dispatch({ type: 'update', value: tasklist })
         }
 
         return (
@@ -266,6 +275,8 @@ const HOC = Component => {
                 showTrashBin={() => dispatch({ type: 'showTrash' })}
                 hideTrashBin={() => dispatch({ type: 'hideTrash' })}
                 trash={showTrash}
+                referenceDev={currentDevField}
+                referenceDesc={currentDescField}
                 error={error} />
         )
     }
