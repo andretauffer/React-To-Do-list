@@ -20,13 +20,4 @@ function backgroundGradFx(initial, final) {
     }, 50);
   }
   
-  export function lightSet(transp) {
-    const background = document.querySelector('body');
-    const card = document.querySelectorAll('.toggle-light');
-    background.style.backgroundColor = `rgba(57, 53, 53, ${transp / 10} )`;
-    for (let i = 0; i < card.length; i++) {
-      card[i].style.backgroundColor = `rgba(225, 212, 212, ${transp / 10} )`;
-    }
-  }
-  
   export default backgroundGradFx;
