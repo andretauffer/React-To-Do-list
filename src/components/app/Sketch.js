@@ -1,8 +1,5 @@
 import React, { useReducer, useEffect } from 'react'
 import './index.css';
-import trashWhite from './images/trashwhite.png'
-import trashBlack from './images/trashblack.png'
-// const trashBin = require('./images/noun_Trash_281501513.png')
 
 const App = (props) => {
     return (
@@ -10,19 +7,19 @@ const App = (props) => {
         <div>
             <h1>Task Manager</h1>
             <div className="form-trash">
-                <Form {...props} />
+                <FormData />
                 {props.trash ?
                     <div>
-                        <Tasks {...props} column={'deleted'} updateTask={props.update} />
-                        <img src={trashWhite} alt="trashBin" className="trash-btn white" type="button" value="send" onClick={props.hideTrashBin}/>
+                        <TaskData column={'deleted'} updateTask={props.update} />
+                        <button id="submit-btn" type="button" value="send" onClick={props.hideTrashBin}>Hide trash!</button>
                     </div>
-                    : <img src={trashBlack} alt="trashBin" className="trash-btn black" type="button" value="send" onClick={props.showTrashBin}/>}
+                    : <button id="submit-btn" type="button" value="send" onClick={props.showTrashBin}>Show trash!</button>}
             </div>
             <div className="general-columns">
-                <Tasks {...props} column={'created'} updateTask={props.update} />
-                <Tasks {...props} column={'on-hold'} updateTask={props.update} />
-                <Tasks {...props} column={'active'} updateTask={props.update} />
-                <Tasks {...props} column={'completed'} updateTask={props.update} />
+                <TaskData column={'created'} updateTask={props.update} {...props} />
+                <TaskData column={'onhold'} updateTask={props.update} />
+                <TaskData column={'active'} updateTask={props.update} />
+                <TaskData column={'completed'} updateTask={props.update} />
             </div>
         </div>
     )
@@ -67,14 +64,10 @@ const Form = (props) =>
     </div>
 
 const Tasks = (props) => {
-    console.log(props.getStore.find(el => {
-        console.log(el);
-        // el.state === props.column
-    }))
+    console.log(props)
     return (
         <div className={"column " + props.column}>
-            {props.getStore.find(el => el.status === props.column) ? props.column : <div className="no-tasks">No {props.column} tasks at the moment</div>}
-            {props.getStore.length > 0 ? props.getStore.map(el => {
+            {props.getStore ? props.getStore.map(el => {
                 if (el.status === props.column) {
                     return (
                         <div className={"task " + props.column} id={el.id}>
@@ -103,11 +96,11 @@ const Tasks = (props) => {
                                     <button className="task-btns" onClick={(e) => props.updateTask(e, { type: 'completed' })}>Completed</button> :
                                     <button className="task-btns" disabled>Completed</button>
                                 }
-                                {(el.status === 'on-hold' || el.status === 'completed') ?
+                                {(el.status === 'onhold' || el.status === 'completed') ?
                                     <button className="task-btns" disabled>On Hold</button> :
-                                    <button className="task-btns" onClick={(e) => props.updateTask(e, { type: 'on-hold' })}>On Hold</button>
+                                    <button className="task-btns" onClick={(e) => props.updateTask(e, { type: 'onhold' })}>On Hold</button>
                                 }
-                                <button className="task-btns" onClick={(e) => props.update(e, { type: 'update' })}>Update</button>
+                                <button className="task-btns" onClick={(e) => props.updateTask(e, { type: 'update' })}>Update</button>
                                 {(!el.developer || el.status === 'active' || el.status === 'completed' || el.status === 'deleted') ?
                                     <button className="task-btns" disabled>Active</button> :
                                     <button className="task-btns" onClick={(e) => props.updateTask(e, { type: 'active' })}>Active</button>
@@ -116,7 +109,7 @@ const Tasks = (props) => {
                         </div>
                     )
                 }
-            }) : <div className="no-tasks">No {props.column} tasks at the moment</div>}
+            }) : <div>No tasks at the moment</div>}
         </div>
     )
 }
@@ -183,7 +176,7 @@ const HOC = Component => {
             return list;
         }
         const tasklist = readFromStorage();
-
+        
         const createTask = () => {
             let id = Math.round(Math.random() * 1000);
             if (title !== '') {
@@ -195,6 +188,7 @@ const HOC = Component => {
                     status: 'created',
                     id
                 });
+                dispatch({ type: 'update', value: tasklist })
                 localStorage.setItem('list', JSON.stringify(tasklist));
             } else {
                 dispatch({ type: 'error' });
@@ -203,25 +197,21 @@ const HOC = Component => {
 
         const cleanStorage = () => {
             localStorage.removeItem('list');
-            dispatch({ type: 'update', value: []})
         }
 
         const updateTask = (e, action) => {
+            console.log('dev e desc', developer, description)
             const elementId = Number(e.currentTarget.parentElement.parentElement.id);
             const updatedTaskList = tasklist.map(el => {
                 if (el.id === elementId) {
                     switch (action.type) {
                         case 'update':
-                            console.log('dev and desc', el.developer, el.description)
-                            let actualDev = '';
-                            el.developer !== undefined ? actualDev = el.developer : actualDev = developer ;
-                            // if(el.developer !== undefined) dispatch({ type: 'developer', value: el.developer});
-                            // if(el.description !== undefined) dispatch({ type: 'description', value: el.description});
-                            return el = { title: el.title, developer, description, status: el.status, id: el.id };
-                            case 'delete':
+                            console.log('dev e desc', developer, description)
+                            return el = { title: el.title, developer: developer, description: description, status: el.status, id: el.id };
+                        case 'delete':
                             return el = { title: el.title, developer: el.developer, description: el.description, status: 'deleted', id: el.id };
-                        case 'on-hold':
-                            return el = { title: el.title, developer: el.developer, description: el.description, status: 'on-hold', id: el.id };
+                        case 'onhold':
+                            return el = { title: el.title, developer: el.developer, description: el.description, status: 'onhold', id: el.id };
                         case 'completed':
                             return el = { title: el.title, developer: el.developer, description: el.description, status: 'completed', id: el.id };
                         case 'active':
@@ -233,7 +223,7 @@ const HOC = Component => {
                 return el
             })
             localStorage.setItem('list', JSON.stringify(updatedTaskList));
-            dispatch({type: 'update', value: tasklist})
+            dispatch({ type: 'update', value: tasklist })
         }
 
         return (
@@ -272,6 +262,9 @@ const HOC = Component => {
     return GetFormData;
 }
 
+
+const FormData = HOC(Form);
+const TaskData = HOC(Tasks);
 const EnhancedApp = HOC(App);
 
 export default EnhancedApp

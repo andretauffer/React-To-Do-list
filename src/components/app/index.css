@@ -15,12 +15,22 @@
     box-shadow: 5px 6px 12px -4px rgba(148,118,148,1);
 }
 
+.column {
+}
+
+.column.deleted {
+    display: flex;
+    flex-flow: row wrap;
+}
+
 .task {
     display: flex;
     flex-flow: column nowrap;
     margin: 1em 1em 1em 1em;
     padding: 1em 1em 1em 1em;
     max-width: 40vw;
+    max-height: 30vh;
+    justify-content: center;
     background-color: white;
     border-radius: 0.2em;
     box-shadow: 5px 6px 12px -4px rgba(148,118,148,1);
@@ -31,11 +41,11 @@
 }
 
 .deleted {
-    background-color: rgb(121, 105, 105);
+    background-color: rgba(102, 88, 88, 0.233);
 }
 
-.onhold {
-    background-color: lightgray;
+.on-hold {
+    background-color: rgb(253, 169, 169);
 }
 
 .active {
@@ -58,4 +68,28 @@
 .column {
     display: flex;
     flex-flow: column nowrap;
+}
+
+.no-tasks {
+    display: flex;
+    flex-flow: column nowrap;
+    margin: 1em 1em 1em 1em;
+    padding: 1em 1em 1em 1em;
+    max-width: 40vw;
+    max-height: 30vh;
+    justify-content: center;
+    background-color: white;
+    border-radius: 0.2em;
+    box-shadow: 5px 6px 12px -4px rgba(148,118,148,1);  
+}
+
+.trash-btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(85, 60, 60, 0.733);
+    border-radius: 10%;
+    padding: 0.1vw;
+    width: 5vw;
+    height: 5vw;
 }
