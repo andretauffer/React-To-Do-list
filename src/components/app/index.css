@@ -15,9 +15,6 @@
     box-shadow: 5px 6px 12px -4px rgba(148,118,148,1);
 }
 
-.column {
-}
-
 .column.deleted {
     display: flex;
     flex-flow: row wrap;
@@ -44,6 +41,10 @@
     background-color: rgba(102, 88, 88, 0.233);
 }
 
+/* .deleted.toggle-light {
+    background-color: rgba(102, 88, 88, 0.233);
+} */
+
 .on-hold {
     background-color: rgb(253, 169, 169);
 }
@@ -54,6 +55,11 @@
 
 .completed {
     background-color: rgb(196, 223, 99);
+}
+
+.light-btn {
+    width: 2vw;
+    height: 2vw;
 }
 
 .task-btns {
@@ -68,6 +74,9 @@
 .column {
     display: flex;
     flex-flow: column nowrap;
+    /* background-color: #fff; */
+    border-radius: 1%;
+    margin: 0 0.5vw 0 0.5vw;
 }
 
 .edit {
@@ -81,7 +90,7 @@
 .no-tasks {
     display: flex;
     flex-flow: column nowrap;
-    margin: 1em 1em 1em 1em;
+    margin: 6vw 3vw 3vw 3vw;
     padding: 1em 1em 1em 1em;
     max-width: 40vw;
     max-height: 30vh;
@@ -89,6 +98,10 @@
     background-color: white;
     border-radius: 0.2em;
     box-shadow: 5px 6px 12px -4px rgba(148,118,148,1);  
+}
+
+.column-titles {
+    margin: 3vw 0 0 3vw;
 }
 
 .trash-btn{
@@ -105,4 +118,12 @@
 .developer-field-btn {
     display: flex;
     flex-flow: row nowrap;
+}
+
+.buttons-container {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    margin: 2vw 0 0 0;
+    height: 2vw;
 }

@@ -3,7 +3,9 @@ import './index.css';
 import trashWhite from './images/trashwhite.png'
 import trashBlack from './images/trashblack.png'
 import edit from './images/edit.png'
-// const trashBin = require('./images/noun_Trash_281501513.png')
+import toggleOn from './images/switch.svg'
+import toggleOff from './images/switch (1).svg'
+import backgroundGradFx from './toggleLight'
 
 const App = (props) => {
     return (
@@ -33,7 +35,7 @@ const Form = (props) =>
 
     <div>
         <div>
-            <form className="input-form" value="x">
+            <form className="input-form toggle-light" value="x">
                 {<p className='error'>{props.error}</p>}
                 <label htmlFor="title">
                     <p>Title</p>
@@ -62,6 +64,7 @@ const Form = (props) =>
                 <div className="buttons-container">
                     <button id="submit-btn" type="button" value="send" onClick={props.storeTask}>Create</button>
                     <button id="submit-btn" type="button" value="send" onClick={props.deleteAll}>Delete everything!</button>
+                    <img src={toggleOff} alt="lights button" className="light-btn" type="button" value="send" onClick={props.lights}/>
                 </div>
             </form>
         </div>
@@ -69,9 +72,10 @@ const Form = (props) =>
 
 const Tasks = (props) => {
     return (
-        <div className={"column " + props.column}>
-            {props.getStore.find(el => el.status === props.column) ? props.column : <div className="no-tasks">No {props.column} tasks at the moment</div>}
-            {props.getStore.length > 0 ? props.getStore.map(el => {
+        <div className={"column " + props.column + " toggle-light"}>
+            {props.getStore.find(el => el.status === props.column) ? <h4 className="column-titles"> {props.column.toUpperCase()} </h4>
+             : <div className="no-tasks">No {props.column} tasks at the moment</div>}
+            {props.getStore.map(el => {
                 if (el.status === props.column) {
                     return (
                         <div className={"task " + props.column} id={el.id}>
@@ -120,7 +124,7 @@ const Tasks = (props) => {
                         </div>
                     )
                 }
-            }) : <div className="no-tasks"></div>}
+            }) }
         </div>
     )
 }
@@ -245,6 +249,16 @@ const HOC = Component => {
             dispatch({ type: 'update', value: tasklist })
         }
 
+        function toggleLight() {
+            let light = localStorage.getItem('light');
+            let btnImage = document.querySelector('.light-btn');
+            light === 'light' ? btnImage.src = toggleOff : btnImage.src = toggleOn;
+            btnImage === toggleOn ? btnImage = toggleOff : btnImage = toggleOn;
+            light === 'light' ? backgroundGradFx(1, 18) : backgroundGradFx(17, 0);
+            light === 'light' ? light = 'dark' : light = 'light';
+            localStorage.setItem('light', light);
+          }
+
         return (
             <Component
                 {...props}
@@ -277,6 +291,7 @@ const HOC = Component => {
                 trash={showTrash}
                 referenceDev={currentDevField}
                 referenceDesc={currentDescField}
+                lights={() => toggleLight()}
                 error={error} />
         )
     }
