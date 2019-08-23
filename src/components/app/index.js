@@ -21,7 +21,6 @@ const App = (props) => {
                     : <img src={trashBlack} alt="trashBin" className="trash-btn black" type="button" value="send" onClick={props.showTrashBin} />}
             </div>
             <div className="general-columns">
-                {console.log(props.sorted)}
                 <Tasks {...props} column={'created'} updateTask={props.update} /> 
                 <Tasks {...props} column={'on-hold'} updateTask={props.update} />
                 <Tasks {...props} column={'active'} updateTask={props.update} />
@@ -84,7 +83,6 @@ const Form = (props) =>
 const Tasks = (props) => {
     return (
         <div className={"column toggle-light"}>
-            {console.log('sorted in tasks', props.sorted)}
             {props.getStore.find(el => el.status === props.column) ? <h4 className="column-titles"> {props.column.toUpperCase()} </h4>
                 : <div className="no-tasks">No {props.column} tasks at the moment</div>}
             {props.getStore.map(el => {
