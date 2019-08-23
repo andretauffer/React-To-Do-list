@@ -54,6 +54,16 @@ const Form = (props) =>
                         value={props.getDeveloper}
                         onChange={props.setDeveloper} />
                 </label>
+                <label htmlFor="difficulty-input">
+                    <p>Complexity</p>
+                    <input className="difficulty-input" 
+                    type="number" 
+                    min="0" max="10" step="1" 
+                    onkeydown="return false"
+                    value={props.difficulty}
+                    onChange={props.setDifficulty} />
+                </label>
+
                 <p>Description</p>
                 <textarea
                     id="desc"
@@ -64,7 +74,7 @@ const Form = (props) =>
                 <div className="buttons-container">
                     <button id="submit-btn" type="button" value="send" onClick={props.storeTask}>Create</button>
                     <button id="submit-btn" type="button" value="send" onClick={props.deleteAll}>Delete everything!</button>
-                    <img src={toggleOff} alt="lights button" className="light-btn" type="button" value="send" onClick={props.lights}/>
+                    <img src={toggleOff} alt="lights button" className="light-btn" type="button" value="send" onClick={props.lights} />
                 </div>
             </form>
         </div>
@@ -74,7 +84,7 @@ const Tasks = (props) => {
     return (
         <div className={"column toggle-light"}>
             {props.getStore.find(el => el.status === props.column) ? <h4 className="column-titles"> {props.column.toUpperCase()} </h4>
-             : <div className="no-tasks">No {props.column} tasks at the moment</div>}
+                : <div className="no-tasks">No {props.column} tasks at the moment</div>}
             {props.getStore.map(el => {
                 if (el.status === props.column) {
                     return (
@@ -83,7 +93,7 @@ const Tasks = (props) => {
                             {el.developer ?
                                 <div className="developer-field-btn">
                                     <div className="task-developer"> Developer: {el.developer}</div>
-                                    <img src={edit} alt='edit' className="edit btn" onClick={(e) => props.updateTask(e, { type: 'clearDevField' })}/>
+                                    <img src={edit} alt='edit' className="edit btn" onClick={(e) => props.updateTask(e, { type: 'clearDevField' })} />
                                 </div>
                                 : <input
                                     className="developer-input"
@@ -93,7 +103,7 @@ const Tasks = (props) => {
                             {el.description ?
                                 <div className="developer-field-btn">
                                     <div className="task-description">Description: {el.description}</div>
-                                    <img src={edit} alt='edit' className="edit btn" onClick={(e) => props.updateTask(e, { type: 'clearDescField' })}/>
+                                    <img src={edit} alt='edit' className="edit btn" onClick={(e) => props.updateTask(e, { type: 'clearDescField' })} />
                                 </div>
                                 : <textarea
                                     id="desc"
@@ -102,6 +112,10 @@ const Tasks = (props) => {
                                     ref={props.referenceDesc} />}
 
                             <div className="task-status"> {el.status}</div>
+                            <label htmlFor="developer-input">
+                                <p>Complexity</p>
+                                <div className="task-difficulty">{el.difficulty}</div>
+                            </label>
                             <div className="btns-container">
                                 {(el.status === 'deleted' || el.status === 'completed') ?
                                     <button className="task-btns" disabled>Delete</button> :
@@ -124,7 +138,7 @@ const Tasks = (props) => {
                         </div>
                     )
                 }
-            }) }
+            })}
         </div>
     )
 }
@@ -137,6 +151,7 @@ const initialState = {
     error: '',
     showTrash: false,
     store: '',
+    difficulty: 0,
 }
 
 const HOCreducer = (state, action) => {
@@ -154,6 +169,7 @@ const HOCreducer = (state, action) => {
                 description: '',
                 developer: '',
                 error: '',
+                difficulty: 0,
             }
         case 'update':
             return {
@@ -184,7 +200,7 @@ const HOCreducer = (state, action) => {
 const HOC = Component => {
     const GetFormData = (props) => {
         const [state, dispatch] = useReducer(HOCreducer, initialState);
-        const { title, developer, description, error, status, showTrash } = state;
+        const { title, developer, description, error, status, showTrash, difficulty } = state;
         const currentDevField = useRef(null);
         const currentDescField = useRef(null);
         const readFromStorage = () => {
@@ -203,7 +219,8 @@ const HOC = Component => {
                     developer: developer,
                     description: description,
                     status: 'created',
-                    id
+                    id,
+                    difficulty,
                 });
                 localStorage.setItem('list', JSON.stringify(tasklist));
             } else {
@@ -257,7 +274,7 @@ const HOC = Component => {
             light === 'light' ? backgroundGradFx(1, 18) : backgroundGradFx(17, 0);
             light === 'light' ? light = 'dark' : light = 'light';
             localStorage.setItem('light', light);
-          }
+        }
 
         return (
             <Component
@@ -278,6 +295,12 @@ const HOC = Component => {
                 setDeveloper={e => dispatch({
                     type: 'field',
                     field: 'developer',
+                    value: e.currentTarget.value
+                })}
+                getDifficulty={difficulty}
+                setDifficulty={e => dispatch({
+                    type: 'field',
+                    field: 'difficulty',
                     value: e.currentTarget.value
                 })}
                 getStatus={status}
